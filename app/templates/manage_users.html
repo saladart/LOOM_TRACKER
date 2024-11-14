@@ -2,6 +2,9 @@
 {% block content %}
 <div class="container mt-4">
     <h2>Manage Users</h2>
+    {% if current_user.is_admin %}
+    <a href="/add_user" class="btn btn-primary add-btn">Add New User</a>
+    {% endif %}
     <table class="table">
         <thead>
             <tr>

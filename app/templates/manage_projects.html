@@ -3,6 +3,9 @@
 {% block content %}
 <div class="container mt-4">
     <h2>Manage Projects</h2>
+    {% if current_user.is_admin %}
+    <a href="/add_project" class="btn btn-primary add-btn">Add New Project</a>
+    {% endif %}
     <table class="table">
         <thead>
             <tr>

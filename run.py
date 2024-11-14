@@ -1,5 +1,4 @@
 # TODO:
-# Some simple design with dark theme and LOOM logo
 # Timeline with usser occupation on projects
 # Add export options for aggreagation data
 # Add table view for admin for db entries
