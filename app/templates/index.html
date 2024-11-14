@@ -1,0 +1,224 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-8">
+        <div class="monthly-summary">
+            <h4>Monthly Summary</h4>
+            <p>Total hours this month: <strong>{{ "%.2f"|format(current_month_hours) }}</strong></p>
+        </div>
+
+        <form id="timeEntryForm">
+            <div class="mb-3">
+                <label for="entry-date" class="form-label">Date</label>
+                <input type="date" class="form-control" id="entry-date" required>
+            </div>
+
+            <div id="entries-container">
+                <div class="entry-row row">
+                    <div class="col-md-6">
+                        <select class="form-select project-select" required>
+                            <option value="">Select Project</option>
+                            {% for project in projects %}
+                            <option value="{{ project.id }}">{{ project.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="col-md-6">
+                        <input type="text" class="form-control hours-input" 
+                            placeholder="Hours (e.g., 2.5 or 2:30)" required>
+                    </div>
+                </div>
+            </div>
+
+            <button type="button" class="btn btn-outline-secondary add-entry-btn" 
+                    onclick="addEntryRow()">+ Add Another Entry</button>
+
+            <button type="submit" class="btn btn-primary">Save Entries</button>
+        </form>
+
+        <div class="export-section">
+            <button type="button" class="btn btn-success" 
+                    onclick="showExportModal()">Export Time Entries</button>
+        </div>
+        {% if current_user.is_admin %}
+        <div class="add-user-btn">
+            <a href="/add_user" class="btn btn-primary">Add New User</a>
+        </div>
+        <div class="add-project">
+            <a href="/add_project" class="btn btn-primary">Add New Project</a>
+        </div>
+        {% endif %}
+
+    </div>
+</div>
+
+<!-- Export Modal -->
+<div class="modal fade" id="exportModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Export Options</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="exportForm">
+                    <div class="mb-3">
+                        <label class="form-label">Date Range</label>
+                        <div class="row">
+                            <div class="col">
+                                <input type="date" class="form-control" id="export-start-date" required>
+                                <label class="form-text">Start Date</label>
+                            </div>
+                            <div class="col">
+                                <input type="date" class="form-control" id="export-end-date" required>
+                                <label class="form-text">End Date</label>
+                            </div>
+                        </div>
+                    </div>
+
+                    {% if current_user.is_admin %}
+                    <div class="mb-3">
+                        <label class="form-label">Projects</label>
+                        <select class="form-select" id="export-projects" multiple>
+                            {% for project in projects %}
+                            <option value="{{ project.id }}">{{ project.name }}</option>
+                            {% endfor %}
+                        </select>
+                        <div class="form-text">Leave empty to include all projects</div>
+                    </div>
+                    {% endif %}
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary" onclick="exportData()">Export</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Set today's date as default
+    const today = new Date().toISOString().split('T')[0];
+    document.getElementById('entry-date').value = today;
+    
+    // Form submission handler
+    document.getElementById('timeEntryForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        submitEntries();
+    });
+});
+
+function addEntryRow() {
+    const container = document.getElementById('entries-container');
+    const newRow = container.children[0].cloneNode(true);
+    
+    // Clear the values
+    newRow.querySelector('.project-select').value = '';
+    newRow.querySelector('.hours-input').value = '';
+    
+    container.appendChild(newRow);
+}
+
+function parseHours(hoursStr) {
+    if (hoursStr.includes(':')) {
+        const [hours, minutes] = hoursStr.split(':').map(Number);
+        return hours + (minutes / 60);
+    }
+    return parseFloat(hoursStr);
+}
+
+async function submitEntries() {
+    const date = document.getElementById('entry-date').value;
+    const entries = [];
+    
+    document.querySelectorAll('.entry-row').forEach(row => {
+        const projectId = row.querySelector('.project-select').value;
+        const hoursStr = row.querySelector('.hours-input').value;
+        
+        if (projectId && hoursStr) {
+            entries.push({
+                project_id: projectId,
+                hours: parseHours(hoursStr)
+            });
+        }
+    });
+    
+    try {
+        const response = await fetch('/add_entry', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                date: date,
+                entries: entries
+            })
+        });
+        
+        if (response.ok) {
+            location.reload();
+        } else {
+            alert('Error saving entries. Please try again.');
+        }
+    } catch (error) {
+        console.error('Error:', error);
+        alert('Error saving entries. Please try again.');
+    }
+}
+
+function showExportModal() {
+    const modal = new bootstrap.Modal(document.getElementById('exportModal'));
+    modal.show();
+}
+
+async function exportData() {
+    const startDate = document.getElementById('export-start-date').value;
+    const endDate = document.getElementById('export-end-date').value;
+    
+    let projects = [];
+    const projectsSelect = document.getElementById('export-projects');
+    if (projectsSelect) {
+        projects = Array.from(projectsSelect.selectedOptions).map(option => option.value);
+    }
+    
+    try {
+        const response = await fetch('/export', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                start_date: startDate,
+                end_date: endDate,
+                projects: projects
+            })
+        });
+        
+        if (response.ok) {
+            const blob = await response.blob();
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `time_report_${new Date().toISOString().split('T')[0]}.xlsx`;
+            document.body.appendChild(a);
+            a.click();
+            window.URL.revokeObjectURL(url);
+            document.body.removeChild(a);
+            
+            const modal = bootstrap.Modal.getInstance(document.getElementById('exportModal'));
+            modal.hide();
+        } else {
+            alert('Error exporting data. Please try again.');
+        }
+    } catch (error) {
+        console.error('Error:', error);
+        alert('Error exporting data. Please try again.');
+    }
+}
+</script>
+{% endblock %}
