@@ -35,20 +35,23 @@
                     onclick="addEntryRow()">+ Add Another Entry</button>
 
             <button type="submit" class="btn btn-primary">Save Entries</button>
+            
+
         </form>
 
-        <div class="export-section">
-            <button type="button" class="btn btn-success" 
-                    onclick="showExportModal()">Export Time Entries</button>
+        <a href="{{ url_for('main.bulk_entry') }}" class="btn btn-primary">Bulk Time Entry</a>
+        <div>
+            <div class="export-section">
+                <button type="button" class="btn btn-success" 
+                        onclick="showExportModal()">Export Time Entries</button>
+            </div>
+
+            {% if current_user.is_admin %}
+            <a href="/add_user" class="btn btn-primary add-btn">Add New User</a>
+            <a href="/add_project" class="btn btn-primary add-btn">Add New Project</a>
+            {% endif %}
         </div>
-        {% if current_user.is_admin %}
-        <div class="add-user-btn">
-            <a href="/add_user" class="btn btn-primary">Add New User</a>
-        </div>
-        <div class="add-project">
-            <a href="/add_project" class="btn btn-primary">Add New Project</a>
-        </div>
-        {% endif %}
+        
 
     </div>
 </div>

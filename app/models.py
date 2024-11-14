@@ -12,6 +12,7 @@ class User(UserMixin, db.Model):
 class Project(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(100), unique=True, nullable=False)
+    deadline = db.Column(db.Date, nullable=True)
     time_entries = db.relationship('TimeEntry', backref='project', lazy=True)
 
 class TimeEntry(db.Model):

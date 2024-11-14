@@ -1,7 +1,7 @@
 # app/main.py
 from flask import Blueprint, flash, redirect, render_template, request, jsonify, send_file, url_for
 from flask_login import login_required, current_user
-from datetime import datetime
+from datetime import datetime, timedelta
 import pandas as pd
 from io import BytesIO
 from werkzeug.security import generate_password_hash
@@ -113,22 +113,58 @@ def add_user():
 @main.route('/add_project', methods=['GET', 'POST'])
 def add_project():
     if not current_user.is_admin:
-        print('not admin')
         return redirect(url_for('main.index'))
     
     if request.method == 'POST':
         project_name = request.form['project_name']
+        deadline_str = request.form['deadline']
+        
         if Project.query.filter_by(name=project_name).first():
             flash('Project already exists')
-            print('project exists')
             return redirect(url_for('main.add_project'))
         
-        new_project = Project(name=project_name)
+        deadline = None
+        if deadline_str:
+            deadline = datetime.strptime(deadline_str, '%Y-%m-%d').date()
+            
+        new_project = Project(
+            name=project_name,
+            deadline=deadline
+        )
         db.session.add(new_project)
         db.session.commit()
 
         flash(f'Project {project_name} created successfully')
         return redirect(url_for('main.index'))
     
-    # If the request method is GET, render the add_project.html template
     return render_template('add_project.html')
+
+@main.route('/bulk_entry', methods=['GET', 'POST'])
+@login_required
+def bulk_entry():
+    if request.method == 'POST':
+        start_date = datetime.strptime(request.form['start_date'], '%Y-%m-%d').date()
+        end_date = datetime.strptime(request.form['end_date'], '%Y-%m-%d').date()
+        project_id = request.form['project_id']
+        total_hours = float(request.form['hours'])
+        hours_per_day = total_hours / (end_date - start_date).days
+        
+        current_date = start_date
+        while current_date <= end_date:
+            new_entry = TimeEntry(
+                date=current_date,
+                hours=hours_per_day,
+                project_id=int(project_id),
+                user_id=current_user.id
+            )
+            db.session.add(new_entry)
+            current_date = current_date + timedelta(days=1)
+            
+        db.session.commit()
+        flash('Bulk time entries added successfully')
+        return redirect(url_for('main.index'))
+        
+    projects = Project.query.all()
+    return render_template('bulk_entry.html', projects=projects)
+
+
