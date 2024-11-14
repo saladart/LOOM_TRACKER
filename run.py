@@ -1,5 +1,4 @@
 # TODO:
-# Remove User and Remove Project
 # Some simple design with dark theme and LOOM logo
 # Timeline with usser occupation on projects
 # Add export options for aggreagation data

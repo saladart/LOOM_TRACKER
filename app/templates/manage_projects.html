@@ -1,0 +1,33 @@
+<!-- manage_projects.html -->
+{% extends "base.html" %}
+{% block content %}
+<div class="container mt-4">
+    <h2>Manage Projects</h2>
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th>Deadline</th>
+                <th>Status</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for project in projects %}
+            <tr>
+                <td>{{ project.name }}</td>
+                <td>{{ project.deadline.strftime('%Y-%m-%d') if project.deadline else 'N/A' }}</td>
+                <td>{{ 'Active' if project.is_active else 'Inactive' }}</td>
+                <td>
+                    {% if project.is_active %}
+                        <a href="{{ url_for('main.deactivate_project', project_id=project.id) }}" class="btn btn-danger btn-sm">Deactivate</a>
+                    {% else %}
+                        <a href="{{ url_for('main.activate_project', project_id=project.id) }}" class="btn btn-success btn-sm">Activate</a>
+                    {% endif %}
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

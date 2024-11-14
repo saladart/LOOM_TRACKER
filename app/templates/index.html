@@ -20,7 +20,9 @@
                         <select class="form-select project-select" required>
                             <option value="">Select Project</option>
                             {% for project in projects %}
+                            {% if project.is_active %}
                             <option value="{{ project.id }}">{{ project.name }}</option>
+                            {% endif %}
                             {% endfor %}
                         </select>
                     </div>
@@ -85,7 +87,9 @@
                         <label class="form-label">Projects</label>
                         <select class="form-select" id="export-projects" multiple>
                             {% for project in projects %}
+                            {% if project.is_active %}
                             <option value="{{ project.id }}">{{ project.name }}</option>
+                            {% endif %}
                             {% endfor %}
                         </select>
                         <div class="form-text">Leave empty to include all projects</div>

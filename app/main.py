@@ -15,10 +15,13 @@ main = Blueprint('main', __name__)
 @main.route('/')
 @login_required
 def index():
-    projects = Project.query.all()
+    if current_user.is_admin:
+        projects = Project.query.all()
+    else:
+        projects = Project.query.filter_by(is_active=True).all()
     current_month_hours = TimeEntry.query\
         .filter(TimeEntry.user_id == current_user.id)\
-        .filter(extract('month', TimeEntry.date) == datetime.now().month)\
+        .filter(extract('month', TimeEntry.date) == datetime.now().month) \
         .with_entities(func.sum(TimeEntry.hours))\
         .scalar() or 0
         
@@ -100,7 +103,8 @@ def add_user():
         new_user = User(
             username=username,
             password=generate_password_hash(password),
-            is_admin=is_admin
+            is_admin=is_admin,
+            is_active=True
         )
         db.session.add(new_user)
         db.session.commit()
@@ -129,7 +133,8 @@ def add_project():
             
         new_project = Project(
             name=project_name,
-            deadline=deadline
+            deadline=deadline,
+            is_active=True
         )
         db.session.add(new_project)
         db.session.commit()
@@ -167,4 +172,66 @@ def bulk_entry():
     projects = Project.query.all()
     return render_template('bulk_entry.html', projects=projects)
 
+@main.route('/manage_users')
+@login_required
+def manage_users():
+    if not current_user.is_admin:
+        return redirect(url_for('main.index'))
+    users = User.query.all()
+    return render_template('manage_users.html', users=users)
+
+@main.route('/activate_user/<int:user_id>')
+@login_required
+def activate_user(user_id):
+    if not current_user.is_admin:
+        return redirect(url_for('main.index'))
+    user = User.query.get_or_404(user_id)
+    user.is_active = True
+    db.session.commit()
+    flash(f'User {user.username} has been activated')
+    return redirect(url_for('main.manage_users'))
+
+@main.route('/deactivate_user/<int:user_id>')
+@login_required
+def deactivate_user(user_id):
+    if not current_user.is_admin:
+        return redirect(url_for('main.index'))
+    user = User.query.get_or_404(user_id)
+    if user.username == 'admin':
+        flash('Cannot deactivate the admin user')
+        return redirect(url_for('main.manage_users'))
+    user.is_active = False
+    db.session.commit()
+    flash(f'User {user.username} has been deactivated')
+    return redirect(url_for('main.manage_users'))
+
+@main.route('/manage_projects')
+@login_required
+def manage_projects():
+    if not current_user.is_admin:
+        return redirect(url_for('main.index'))
+    projects = Project.query.all()
+    return render_template('manage_projects.html', projects=projects)
+
+@main.route('/activate_project/<int:project_id>')
+@login_required
+def activate_project(project_id):
+    if not current_user.is_admin:
+        return redirect(url_for('main.index'))
+    project = Project.query.get_or_404(project_id)
+    project.is_active = True
+    db.session.commit()
+    flash(f'Project {project.name} has been activated')
+    return redirect(url_for('main.manage_projects'))
+
+@main.route('/deactivate_project/<int:project_id>')
+@login_required
+def deactivate_project(project_id):
+    if not current_user.is_admin:
+        return redirect(url_for('main.index'))
+    project = Project.query.get_or_404(project_id)
+    project.is_active = False
+    db.session.commit()
+    flash(f'Project {project.name} has been deactivated')
+    return redirect(url_for('main.manage_projects'))
 

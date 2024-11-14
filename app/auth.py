@@ -11,16 +11,12 @@ def login():
     if request.method == 'POST':
         username = request.form.get('username')
         password = request.form.get('password')
-        
         user = User.query.filter_by(username=username).first()
-        
-        if not user or not check_password_hash(user.password, password):
-            flash('Please check your login details and try again.')
-            return redirect(url_for('auth.login'))
-        
-        login_user(user)
-        return redirect(url_for('main.index'))
-    
+        if user and user.is_active and check_password_hash(user.password, password):
+            login_user(user)
+            return redirect(url_for('main.index'))
+        else:
+            flash('Invalid username or password')
     return render_template('login.html')
 
 @auth.route('/logout')

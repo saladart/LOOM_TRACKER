@@ -26,7 +26,9 @@
                         <select class="form-select" name="project_id" required>
                             <option value="">Select Project</option>
                             {% for project in projects %}
+                            {% if project.is_active %}
                             <option value="{{ project.id }}">{{ project.name }}</option>
+                            {% endif %}
                             {% endfor %}
                         </select>
                     </div>

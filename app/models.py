@@ -7,12 +7,14 @@ class User(UserMixin, db.Model):
     username = db.Column(db.String(80), unique=True, nullable=False)
     password = db.Column(db.String(120), nullable=False)
     is_admin = db.Column(db.Boolean, default=False)
+    is_active = db.Column(db.Boolean, default=True)  # New field
     time_entries = db.relationship('TimeEntry', backref='user', lazy=True)
 
 class Project(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(100), unique=True, nullable=False)
     deadline = db.Column(db.Date, nullable=True)
+    is_active = db.Column(db.Boolean, default=True)  # New field
     time_entries = db.relationship('TimeEntry', backref='project', lazy=True)
 
 class TimeEntry(db.Model):
