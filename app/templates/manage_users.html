@@ -18,7 +18,25 @@
             {% for user in users %}
             <tr>
                 <td>{{ user.username }}</td>
-                <td>{{ 'Yes' if user.is_admin else 'No' }}</td>
+                <td>
+                    {% if user.username != 'admin' %}
+                        <div class="d-flex align-items-center">
+                            <span class="me-2">{{ 'Yes' if user.is_admin else 'No' }}</span>
+                            {% if user.id != current_user.id %}
+                                <button 
+                                    onclick="toggleAdmin({{ user.id }}, '{{ user.username }}', {{ 'true' if not user.is_admin else 'false' }})" 
+                                    class="btn btn-sm {{ 'btn-outline-success' if not user.is_admin else 'btn-outline-warning' }}"
+                                >
+                                    {{ 'Make Admin' if not user.is_admin else 'Remove Admin' }}
+                                </button>
+                            {% elif user.is_admin %}
+                                <span class="text-muted ms-2">(Cannot remove own admin rights)</span>
+                            {% endif %}
+                        </div>
+                    {% else %}
+                        {{ 'Yes' }}
+                    {% endif %}
+                </td>
                 <td>{{ 'Active' if user.is_active else 'Inactive' }}</td>
                 <td>
                     {% if user.username != 'admin' %}
@@ -36,4 +54,34 @@
         </tbody>
     </table>
 </div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+async function toggleAdmin(userId, username, makeAdmin) {
+    if (confirm(`Are you sure you want to ${makeAdmin ? 'make' : 'remove'} ${username} ${makeAdmin ? 'an' : 'from'} admin?`)) {
+        try {
+            const response = await fetch('{{ url_for("main.toggle_admin") }}', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    user_id: userId,
+                    make_admin: makeAdmin
+                })
+            });
+
+            if (response.ok) {
+                location.reload();
+            } else {
+                alert('Error updating admin status');
+            }
+        } catch (error) {
+            console.error('Error:', error);
+            alert('Error updating admin status');
+        }
+    }
+}
+</script>
 {% endblock %}

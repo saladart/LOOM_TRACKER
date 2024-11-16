@@ -192,6 +192,25 @@ def add_project():
     
     return render_template('add_project.html')
 
+@main.route('/set_project_deadline', methods=['POST'])
+@login_required
+def set_project_deadline():
+    if not current_user.is_admin:
+        return jsonify({'status': 'error', 'message': 'Unauthorized'}), 403
+
+    data = request.get_json()
+    project_id = data.get('project_id')
+    deadline_str = data.get('deadline')
+
+    if not project_id or not deadline_str:
+        return jsonify({'status': 'error', 'message': 'Missing data'}), 400
+
+    project = Project.query.get_or_404(project_id)
+    project.deadline = datetime.strptime(deadline_str, '%Y-%m-%d').date()
+    db.session.commit()
+
+    return jsonify({'status': 'success'})
+
 @main.route('/bulk_entry', methods=['GET', 'POST'])
 @login_required
 def bulk_entry():
@@ -392,6 +411,29 @@ def delete_assignment():
         return jsonify({'status': 'error', 'message': 'Assignment not found'}), 404
 
     db.session.delete(assignment)
+    db.session.commit()
+
+    return jsonify({'status': 'success'})
+
+@main.route('/toggle_admin', methods=['POST'])
+@login_required
+def toggle_admin():
+    if not current_user.is_admin:
+        return jsonify({'status': 'error', 'message': 'Unauthorized'}), 403
+
+    data = request.get_json()
+    user_id = data.get('user_id')
+    make_admin = data.get('make_admin')
+
+    if user_id is None or make_admin is None:
+        return jsonify({'status': 'error', 'message': 'Missing data'}), 400
+
+    user = User.query.get_or_404(user_id)
+    
+    if user.username == 'admin' or user.id == current_user.id:
+        return jsonify({'status': 'error', 'message': 'Cannot modify admin status'}), 400
+        
+    user.is_admin = make_admin
     db.session.commit()
 
     return jsonify({'status': 'success'})

@@ -19,7 +19,25 @@
             {% for project in projects %}
             <tr>
                 <td>{{ project.name }}</td>
-                <td>{{ project.deadline.strftime('%Y-%m-%d') if project.deadline else 'N/A' }}</td>
+                <td>
+                    {% if project.deadline %}
+                        {{ project.deadline.strftime('%Y-%m-%d') }}
+                        <button 
+                            class="btn btn-sm btn-outline-primary ms-2" 
+                            onclick="showDeadlineModal({{ project.id }}, '{{ project.name }}', '{{ project.deadline.strftime('%Y-%m-%d') }}')"
+                        >
+                            <i class="bi bi-pencil"></i>
+                        </button>
+                    {% else %}
+                        N/A
+                        <button 
+                            class="btn btn-sm btn-primary ms-2" 
+                            onclick="showDeadlineModal({{ project.id }}, '{{ project.name }}', null)"
+                        >
+                            Set Deadline
+                        </button>
+                    {% endif %}
+                </td>
                 <td>{{ 'Active' if project.is_active else 'Inactive' }}</td>
                 <td>
                     {% if project.is_active %}
@@ -33,4 +51,74 @@
         </tbody>
     </table>
 </div>
+
+<!-- Add Modal -->
+<div class="modal fade" id="deadlineModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Set Project Deadline</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="deadlineForm">
+                    <input type="hidden" id="project_id">
+                    <p id="project_name"></p>
+                    <div class="mb-3">
+                        <label class="form-label">Deadline Date</label>
+                        <input type="date" class="form-control" id="deadline_date" required>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary" onclick="setDeadline()">Save</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% block scripts %}
+<script>
+function showDeadlineModal(projectId, projectName, existingDeadline) {
+    document.getElementById('project_id').value = projectId;
+    document.getElementById('project_name').textContent = `Project: ${projectName}`;
+    
+    if (existingDeadline) {
+        document.getElementById('deadline_date').value = existingDeadline;
+    } else {
+        document.getElementById('deadline_date').value = '';
+    }
+    
+    new bootstrap.Modal(document.getElementById('deadlineModal')).show();
+}
+
+async function setDeadline() {
+    const projectId = document.getElementById('project_id').value;
+    const deadline = document.getElementById('deadline_date').value;
+
+    try {
+        const response = await fetch('{{ url_for("main.set_project_deadline") }}', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                project_id: projectId,
+                deadline: deadline
+            })
+        });
+
+        if (response.ok) {
+            location.reload();
+        } else {
+            alert('Error setting deadline');
+        }
+    } catch (error) {
+        console.error('Error:', error);
+        alert('Error setting deadline');
+    }
+}
+</script>
+{% endblock %}
 {% endblock %}
