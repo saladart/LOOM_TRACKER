@@ -7,7 +7,7 @@ from io import BytesIO
 from werkzeug.security import generate_password_hash
 
 from sqlalchemy import extract, func
-from .models import TimeEntry, Project, User
+from .models import TimeEntry, Project, User, ProjectAssignment
 from . import db
 
 main = Blueprint('main', __name__)
@@ -26,12 +26,16 @@ def index():
         .filter(extract('month', TimeEntry.date) == datetime.now().month) \
         .with_entities(func.sum(TimeEntry.hours)) \
         .scalar() or 0
+    
+    user_assignments = ProjectAssignment.query.filter_by(user_id=current_user.id).all()
+
 
     return render_template(
         'index.html',
         projects=projects,
         users=users,
-        current_month_hours=current_month_hours
+        current_month_hours=current_month_hours,
+        user_assignments=user_assignments
     )
 
 @main.route('/add_entry', methods=['POST'])
@@ -279,3 +283,115 @@ def deactivate_project(project_id):
     flash(f'Project {project.name} has been deactivated')
     return redirect(url_for('main.manage_projects'))
 
+# Assignments
+@main.route('/admin/timeline')
+@login_required
+def admin_timeline():
+    if not current_user.is_admin:
+        return redirect(url_for('main.index'))
+
+    projects = Project.query.filter_by(is_active=True).all()
+    assignments = ProjectAssignment.query.all()
+    users = User.query.filter_by(is_active=True).all()
+
+    # Convert projects to dictionaries
+    projects_data = [{
+        'id': project.id,
+        'name': project.name,
+        'deadline': project.deadline.isoformat() if project.deadline else None
+    } for project in projects]
+
+    # Convert assignments to dictionaries
+    assignments_data = [{
+        'id': assignment.id,
+        'user_id': assignment.user_id,
+        'project_id': assignment.project_id,
+        'start_date': assignment.start_date.isoformat(),
+        'end_date': assignment.end_date.isoformat()
+    } for assignment in assignments]
+
+    # Convert users to dictionaries
+    users_data = [{
+        'id': user.id,
+        'username': user.username
+    } for user in users]
+
+    return render_template(
+        'admin_timeline.html',
+        projects=projects_data,
+        assignments=assignments_data,
+        users=users_data
+    )
+
+@main.route('/admin/assignments', methods=['POST'])
+@login_required
+def create_assignment():
+    print('ASSSSS')
+
+    if not current_user.is_admin:
+        return jsonify({'error': 'Unauthorized'}), 403
+
+    data = request.get_json()
+    user_id = int(data['user_id'])
+    project_id = int(data['project_id'])
+    start_date = datetime.strptime(data['start_date'], '%Y-%m-%d').date()
+    end_date = datetime.strptime(data['end_date'], '%Y-%m-%d').date()
+
+    assignment = ProjectAssignment(
+        user_id=user_id,
+        project_id=project_id,
+        start_date=start_date,
+        end_date=end_date
+    )
+    db.session.add(assignment)
+    db.session.commit()
+
+    return jsonify({
+        'status': 'success',
+        'assignment': {
+            'id': assignment.id,
+            'user_id': assignment.user_id,
+            'project_id': assignment.project_id,
+            'start_date': assignment.start_date.isoformat(),
+            'end_date': assignment.end_date.isoformat()
+        }
+    })
+
+@main.route('/admin/assignments/update', methods=['POST'])
+@login_required
+def update_assignment():
+    if not current_user.is_admin:
+        return jsonify({'error': 'Unauthorized'}), 403
+
+    data = request.get_json()
+    assignment_id = int(data['id'])
+    assignment = ProjectAssignment.query.get(assignment_id)
+    if not assignment:
+        return jsonify({'status': 'error', 'message': 'Assignment not found'}), 404
+
+    assignment.start_date = datetime.fromisoformat(data['start_date']).date()
+    assignment.end_date = datetime.fromisoformat(data['end_date']).date()
+    db.session.commit()
+
+    return jsonify({'status': 'success'})
+
+@main.route('/admin/assignments/delete', methods=['POST'])
+@login_required
+def delete_assignment():
+    print('ASSSSS')
+    if not current_user.is_admin:
+        return jsonify({'status': 'error', 'message': 'Unauthorized'}), 403
+
+    data = request.get_json()
+    assignment_id = data.get('id')
+    if not assignment_id:
+        return jsonify({'status': 'error', 'message': 'No assignment ID provided'}), 400
+
+    assignment = ProjectAssignment.query.get(assignment_id)
+    if not assignment:
+        return jsonify({'status': 'error', 'message': 'Assignment not found'}), 404
+
+    db.session.delete(assignment)
+    db.session.commit()
+
+    return jsonify({'status': 'success'})

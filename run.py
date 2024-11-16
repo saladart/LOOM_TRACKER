@@ -1,7 +1,7 @@
 # TODO:
 # Timeline with usser occupation on projects
-# Add export options for aggreagation data
-# Add table view for admin for db entries
+# Add "Add Deadline" button on project page
+# Add DB automatic backup
 
 
 from app import create_app

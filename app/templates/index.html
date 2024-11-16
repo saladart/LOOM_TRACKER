@@ -6,6 +6,17 @@
         <div class="monthly-summary">
             <h4>Monthly Summary</h4>
             <p>Total hours this month: <strong>{{ "%.2f"|format(current_month_hours) }}</strong></p>
+            <h4>Your Project Assignments</h4>
+            <ul>
+                {% for assignment in user_assignments %}
+                <li>
+                    <strong>{{ assignment.project.name }}</strong>
+                    ({{ assignment.start_date.strftime('%Y-%m-%d') }} to {{ assignment.end_date.strftime('%Y-%m-%d') }})
+                </li>
+                {% else %}
+                <li>No project assignments.</li>
+                {% endfor %}
+            </ul>
         </div>
 
         <form id="timeEntryForm">
