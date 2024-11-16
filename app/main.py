@@ -17,17 +17,22 @@ main = Blueprint('main', __name__)
 def index():
     if current_user.is_admin:
         projects = Project.query.all()
+        users = User.query.all()
     else:
         projects = Project.query.filter_by(is_active=True).all()
-    current_month_hours = TimeEntry.query\
-        .filter(TimeEntry.user_id == current_user.id)\
+        users = None
+    current_month_hours = TimeEntry.query \
+        .filter(TimeEntry.user_id == current_user.id) \
         .filter(extract('month', TimeEntry.date) == datetime.now().month) \
-        .with_entities(func.sum(TimeEntry.hours))\
+        .with_entities(func.sum(TimeEntry.hours)) \
         .scalar() or 0
-        
-    return render_template('index.html', 
-                        projects=projects,
-                        current_month_hours=current_month_hours)
+
+    return render_template(
+        'index.html',
+        projects=projects,
+        users=users,
+        current_month_hours=current_month_hours
+    )
 
 @main.route('/add_entry', methods=['POST'])
 @login_required
@@ -54,9 +59,9 @@ def export_data():
     start_date = datetime.strptime(data['start_date'], '%Y-%m-%d').date()
     end_date = datetime.strptime(data['end_date'], '%Y-%m-%d').date()
     
-    query = TimeEntry.query\
-        .join(Project)\
-        .filter(TimeEntry.date.between(start_date, end_date))
+    query = TimeEntry.query.join(Project).join(User).filter(
+        TimeEntry.date.between(start_date, end_date)
+    )
     
     if not current_user.is_admin:
         query = query.filter(TimeEntry.user_id == current_user.id)
@@ -64,19 +69,58 @@ def export_data():
     if data.get('projects'):
         query = query.filter(Project.id.in_(data['projects']))
     
+    if data.get('users'):
+        query = query.filter(User.id.in_(data['users']))
+    
     entries = query.all()
     
     df = pd.DataFrame([{
-        'Date': entry.date,
-        'Project': entry.project.name,
-        'Hours': entry.hours,
-        'User': entry.user.username
+        'Date': entry.date.strftime('%Y-%m-%d') if hasattr(entry, 'date') else '',
+        'Project': entry.project.name if hasattr(entry.project, 'name') else '',
+        'User': entry.user.username if hasattr(entry.user, 'username') else '',
+        'Hours': entry.hours
     } for entry in entries])
     
+    # Sort by date if 'Date' column exists
+    if 'Date' in df.columns:
+        df = df.sort_values('Date')
+    
+    # Aggregate data if requested
+    aggregate_by = data.get('aggregate_by')
+    if aggregate_by == 'project':
+        df = df.groupby(['Project']).agg({'Hours': 'sum'}).reset_index()
+    elif aggregate_by == 'user':
+        df = df.groupby(['User']).agg({'Hours': 'sum'}).reset_index()
+    elif aggregate_by == 'project_user':
+        df = df.groupby(['Project', 'User']).agg({'Hours': 'sum'}).reset_index()
+    
+    # Calculate total hours
+    total_hours = df['Hours'].sum()
+    
+    # Get list of columns and indices
+    columns = df.columns.tolist()
+    hours_idx = columns.index('Hours')
+    meta_idx = hours_idx - 1 if hours_idx > 0 else 0
+
+    empty_row = pd.DataFrame([{col: '' for col in columns}])
+    # Create empty rows with the same columns
+    summary_row = pd.DataFrame([{col: '' for col in columns}])
+    summary_row.iloc[0, meta_idx] = 'Total Hours'
+    summary_row.iloc[0, hours_idx] = total_hours
+
+    export_range_row = pd.DataFrame([{col: '' for col in columns}])
+    export_range_row.iloc[0, meta_idx] = f'Export Range: {start_date} to {end_date}'
+
+    date_generated_row = pd.DataFrame([{col: '' for col in columns}])
+    date_generated_row.iloc[0, meta_idx] = f'Date Generated: {datetime.now().strftime("%Y-%m-%d")}'
+
+    # Concatenate the DataFrames
+    df = pd.concat([df, empty_row, summary_row, export_range_row, date_generated_row], ignore_index=True)
+    
+    # Export to Excel
     output = BytesIO()
     with pd.ExcelWriter(output, engine='xlsxwriter') as writer:
-        df.to_excel(writer, index=False)
-    
+        df.to_excel(writer, index=False, sheet_name='Report')
     output.seek(0)
     return send_file(
         output,
