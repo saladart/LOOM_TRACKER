@@ -345,8 +345,6 @@ def admin_timeline():
 @main.route('/admin/assignments', methods=['POST'])
 @login_required
 def create_assignment():
-    print('ASSSSS')
-
     if not current_user.is_admin:
         return jsonify({'error': 'Unauthorized'}), 403
 
@@ -389,7 +387,7 @@ def update_assignment():
         return jsonify({'status': 'error', 'message': 'Assignment not found'}), 404
 
     assignment.start_date = datetime.fromisoformat(data['start_date']).date()
-    assignment.end_date = datetime.fromisoformat(data['end_date']).date()
+    assignment.end_date = datetime.fromisoformat(data['end_date']).date() + timedelta(days=1)
     db.session.commit()
 
     return jsonify({'status': 'success'})
@@ -397,22 +395,23 @@ def update_assignment():
 @main.route('/admin/assignments/delete', methods=['POST'])
 @login_required
 def delete_assignment():
-    print('ASSSSS')
     if not current_user.is_admin:
         return jsonify({'status': 'error', 'message': 'Unauthorized'}), 403
 
     data = request.get_json()
     assignment_id = data.get('id')
+    print(assignment_id)
     if not assignment_id:
+        print('No assignment ID provided')
         return jsonify({'status': 'error', 'message': 'No assignment ID provided'}), 400
 
     assignment = ProjectAssignment.query.get(assignment_id)
     if not assignment:
+        print('Assignment not found')
         return jsonify({'status': 'error', 'message': 'Assignment not found'}), 404
 
     db.session.delete(assignment)
     db.session.commit()
-
     return jsonify({'status': 'success'})
 
 @main.route('/toggle_admin', methods=['POST'])

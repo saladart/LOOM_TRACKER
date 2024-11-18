@@ -85,42 +85,73 @@ var groups = new vis.DataSet(projects.map(project => ({
 var container = document.getElementById('timeline');
 var options = {
     editable: {
-        add: true,
+        add: false,
         updateTime: true,
         remove: true,
         overrideItems: true
     },
     stack: true,
     orientation: 'both',
-    manipulation: {
-        deleteItem: function(item, callback) {
-            if (confirm('Are you sure you want to delete this assignment?')) {
-                fetch('{{ url_for("main.delete_assignment") }}', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({
-                        id: item.id
-                    })
-                })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.status === 'success') {
-                        callback(item); // Confirm deletion
-                    } else {
-                        alert('Error deleting assignment');
-                        callback(null); // Cancel deletion
-                    }
-                })
-                .catch(error => {
-                    console.error('Error:', error);
-                    alert('Error deleting assignment');
-                    callback(null); // Cancel deletion
-                });
-            } else {
-                callback(null); // Cancel deletion if not confirmed
+    timeAxis: {
+        scale: 'day',
+        step: 1
+    },
+    onMove: function (item, callback) {
+        callback(item); // Allow the move first
+        console.log('Item moved:', item);
+        
+        // Update assignment via AJAX
+        fetch('{{ url_for("main.update_assignment") }}', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                id: item.id,
+                start_date: item.start,
+                end_date: item.end
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.status !== 'success') {
+                alert('Error updating assignment');
+                timeline.setItems(items); // Revert changes
             }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Error updating assignment');
+            timeline.setItems(items); // Revert changes
+        });
+    },
+    onRemove: function (item, callback) {
+        if (confirm('Are you sure you want to delete this assignment?')) {
+            fetch('{{ url_for("main.delete_assignment") }}', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    id: item.id
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    callback(item); // Confirm deletion
+                } else {
+                    callback(null); // Cancel deletion
+                    alert('Error deleting assignment');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Error deleting assignment');
+                callback(null); // Cancel deletion
+            });
+        } else {
+            callback(null); // Cancel deletion if not confirmed
         }
     }
 };
@@ -128,21 +159,94 @@ var timeline = new vis.Timeline(container, items, groups, options);
 
 // Handle adding new assignments
 timeline.on('doubleClick', function (props) {
+    console.log('Clicked on', props);
     if (props.group) {
         var projectId = props.group;
         var clickedDate = props.time;
 
         // Set default dates in the modal
         var dateStr = clickedDate.toISOString().split('T')[0];
+        var dateStrNextDay = new Date(clickedDate.getTime() + 24 * 60 * 60 * 1000).toISOString().split('T')[0];
         document.getElementById('modal-project-id').value = projectId;
         document.getElementById('start-date').value = dateStr;
-        document.getElementById('end-date').value = dateStr;
+        // plus one day for the end day
+        document.getElementById('end-date').value = dateStrNextDay;
 
         // Show the modal
         var assignmentModal = new bootstrap.Modal(document.getElementById('assignmentModal'));
         assignmentModal.show();
     }
 });
+
+
+// // Handle item updates
+// timeline.on('update', function (properties) {
+//     console.log('Item updated', properties);
+
+//     var item = properties.item;
+//     // Update assignment via AJAX
+//     fetch('{{ url_for("main.update_assignment") }}', {
+//         method: 'POST',
+//         headers: {
+//             'Content-Type': 'application/json',
+//         },
+//         body: JSON.stringify({
+//             id: item.id,
+//             start_date: item.start,
+//             end_date: item.end
+//         })
+//     })
+//     .then(response => response.json())
+//     .then(data => {
+//         if (data.status !== 'success') {
+//             alert('Error updating assignment');
+//             properties.callback(null); // Cancel the change
+//         } else {
+//             properties.callback(item); // Confirm the change
+//         }
+//     });
+// });
+
+// // // Handle item removal
+// timeline.on('remove', function (properties, callback) {  // Add callback parameter
+//     var itemId = properties.items[0];  // items is an array of selected item IDs
+//     console.log('Item removed', itemId);
+    
+//     if (confirm('Are you sure you want to delete this assignment?')) {
+//         // Delete assignment via AJAX
+//         fetch('{{ url_for("main.delete_assignment") }}', {
+//             method: 'POST',
+//             headers: {
+//                 'Content-Type': 'application/json',
+//             },
+//             body: JSON.stringify({
+//                 id: itemId
+//             })
+//         })
+//         .then(response => {
+//             if (!response.ok) {
+//                 throw new Error('Network response was not ok');
+//             }
+//             return response.json();
+//         })
+//         .then(data => {
+//             if (data.status === 'success') {
+//                 callback(itemId);  // Confirm deletion with the itemId
+//                 items.remove(itemId);  // Remove from the DataSet
+//             } else {
+//                 throw new Error(data.message || 'Error deleting assignment');
+//             }
+//         })
+//         .catch(error => {
+//             console.error('Error:', error);
+//             alert('Error deleting assignment');
+//             callback(null);  // Cancel deletion
+//         });
+//     } else {
+//         callback(null);  // Cancel deletion if not confirmed
+//     }
+// });
+
 
 // Handle form submission
 document.getElementById('assignmentForm').addEventListener('submit', function (e) {
@@ -185,71 +289,6 @@ document.getElementById('assignmentForm').addEventListener('submit', function (e
         }
     });
 });
-
-// Handle item updates
-timeline.on('update', function (properties) {
-    var item = properties.item;
-    // Update assignment via AJAX
-    fetch('{{ url_for("main.update_assignment") }}', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-            id: item.id,
-            start_date: item.start,
-            end_date: item.end
-        })
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.status !== 'success') {
-            alert('Error updating assignment');
-            properties.callback(null); // Cancel the change
-        } else {
-            properties.callback(item); // Confirm the change
-        }
-    });
-});
-
-// // Handle item removal
-// timeline.on('remove', function (properties, callback) {  // Add callback parameter
-//     var itemId = properties.items[0];  // items is an array of selected item IDs
-    
-//     if (confirm('Are you sure you want to delete this assignment?')) {
-//         // Delete assignment via AJAX
-//         fetch('{{ url_for("main.delete_assignment") }}', {
-//             method: 'POST',
-//             headers: {
-//                 'Content-Type': 'application/json',
-//             },
-//             body: JSON.stringify({
-//                 id: itemId
-//             })
-//         })
-//         .then(response => {
-//             if (!response.ok) {
-//                 throw new Error('Network response was not ok');
-//             }
-//             return response.json();
-//         })
-//         .then(data => {
-//             if (data.status === 'success') {
-//                 callback(itemId);  // Confirm deletion with the itemId
-//                 items.remove(itemId);  // Remove from the DataSet
-//             } else {
-//                 throw new Error(data.message || 'Error deleting assignment');
-//             }
-//         })
-//         .catch(error => {
-//             console.error('Error:', error);
-//             alert('Error deleting assignment');
-//             callback(null);  // Cancel deletion
-//         });
-//     } else {
-//         callback(null);  // Cancel deletion if not confirmed
-//     }
-// });
 
 </script>
 {% endblock %}
