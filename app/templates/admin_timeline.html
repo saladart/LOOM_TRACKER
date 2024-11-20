@@ -88,7 +88,8 @@ var options = {
         add: false,
         updateTime: true,
         remove: true,
-        overrideItems: true
+        overrideItems: true,
+        updateGroup: true
     },
     stack: true,
     orientation: 'both',
@@ -96,8 +97,8 @@ var options = {
         scale: 'day',
         step: 1
     },
+    groupOrder: 'content',
     onMove: function (item, callback) {
-        callback(item); // Allow the move first
         console.log('Item moved:', item);
         
         // Update assignment via AJAX
@@ -108,21 +109,26 @@ var options = {
             },
             body: JSON.stringify({
                 id: item.id,
+                project_id: item.group,  // Add project_id to update
                 start_date: item.start,
                 end_date: item.end
             })
         })
         .then(response => response.json())
         .then(data => {
-            if (data.status !== 'success') {
+            if (data.status === 'success') {
+                callback(item); // Confirm the move
+            } else {
                 alert('Error updating assignment');
                 timeline.setItems(items); // Revert changes
+                callback(null); // Cancel the move
             }
         })
         .catch(error => {
             console.error('Error:', error);
             alert('Error updating assignment');
             timeline.setItems(items); // Revert changes
+            callback(null); // Cancel the move
         });
     },
     onRemove: function (item, callback) {

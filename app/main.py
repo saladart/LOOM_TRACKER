@@ -379,18 +379,16 @@ def create_assignment():
 def update_assignment():
     if not current_user.is_admin:
         return jsonify({'error': 'Unauthorized'}), 403
-
+    
     data = request.get_json()
-    assignment_id = int(data['id'])
-    assignment = ProjectAssignment.query.get(assignment_id)
-    if not assignment:
-        return jsonify({'status': 'error', 'message': 'Assignment not found'}), 404
-
-    assignment.start_date = datetime.fromisoformat(data['start_date']).date()
-    assignment.end_date = datetime.fromisoformat(data['end_date']).date() + timedelta(days=1)
-    db.session.commit()
-
-    return jsonify({'status': 'success'})
+    assignment = ProjectAssignment.query.get(data['id'])
+    if assignment:
+        assignment.project_id = data['project_id']  # Add this line
+        assignment.start_date = datetime.fromisoformat(data['start_date']).date()
+        assignment.end_date = datetime.fromisoformat(data['end_date']).date()
+        db.session.commit()
+        return jsonify({'status': 'success'})
+    return jsonify({'status': 'error', 'message': 'Assignment not found'}), 404
 
 @main.route('/admin/assignments/delete', methods=['POST'])
 @login_required
