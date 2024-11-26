@@ -1,6 +1,6 @@
 # TODO:
-# Timeline with usser occupation on projects
-# Add "Add Deadline" button on project page
+# add logging
+# fix deadline line in timeline
 # Add DB automatic backup
 
 
