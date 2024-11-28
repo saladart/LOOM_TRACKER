@@ -97,3 +97,30 @@ ValueError: time data '' does not match format '%Y-%m-%d'
 2024-11-27 16:35:10,059 - INFO - Serving on http://192.168.3.100:80
 2024-11-27 16:37:22,024 - INFO - Serving on http://192.168.3.100:80
 2024-11-27 16:38:17,176 - INFO - Serving on http://192.168.3.100:80
+2024-11-28 12:46:03,226 - INFO - Serving on http://192.168.3.100:80
+2024-11-28 16:29:15,301 - ERROR - Exception on /export [POST]
+Traceback (most recent call last):
+  File "C:\Users\Honza\Documents\LOOM_TRACKER\.venv\Lib\site-packages\flask\app.py", line 2528, in wsgi_app
+    response = self.full_dispatch_request()
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Honza\Documents\LOOM_TRACKER\.venv\Lib\site-packages\flask\app.py", line 1825, in full_dispatch_request
+    rv = self.handle_user_exception(e)
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Honza\Documents\LOOM_TRACKER\.venv\Lib\site-packages\flask\app.py", line 1823, in full_dispatch_request
+    rv = self.dispatch_request()
+         ^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Honza\Documents\LOOM_TRACKER\.venv\Lib\site-packages\flask\app.py", line 1799, in dispatch_request
+    return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Honza\Documents\LOOM_TRACKER\.venv\Lib\site-packages\flask_login\utils.py", line 290, in decorated_view
+    return current_app.ensure_sync(func)(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Honza\Documents\LOOM_TRACKER\app\main.py", line 63, in export_data
+    start_date = datetime.strptime(data['start_date'], '%Y-%m-%d').date()
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Program Files\WindowsApps\PythonSoftwareFoundation.Python.3.12_3.12.2032.0_x64__qbz5n2kfra8p0\Lib\_strptime.py", line 554, in _strptime_datetime
+    tt, fraction, gmtoff_fraction = _strptime(data_string, format)
+                                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Program Files\WindowsApps\PythonSoftwareFoundation.Python.3.12_3.12.2032.0_x64__qbz5n2kfra8p0\Lib\_strptime.py", line 333, in _strptime
+    raise ValueError("time data %r does not match format %r" %
+ValueError: time data '' does not match format '%Y-%m-%d'

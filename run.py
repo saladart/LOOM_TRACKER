@@ -7,12 +7,12 @@ from app import create_app
 import logging
 import sys
 
-# Configure logging
-logging.basicConfig(
-    filename='app.log',
-    level=logging.INFO,
-    format='%(asctime)s - %(levelname)s - %(message)s'
-)
+# # Configure logging
+# logging.basicConfig(
+#     filename='app.log',
+#     level=logging.,
+#     format='%(asctime)s - %(levelname)s - %(message)s'
+# )
 
 app = create_app()
 
