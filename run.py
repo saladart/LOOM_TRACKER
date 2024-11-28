@@ -19,7 +19,9 @@ app = create_app()
 if __name__ == '__main__':
     try:
         # For production on port 80
-        serve(app, host='192.168.3.100', port=80)
+        # serve(app, host='192.168.3.100', port=80)
+        # For development on port 8080
+        serve(app, host='localhost', port=8080)
     except PermissionError:
         logging.error("Failed to bind to port 80. Try running as administrator.")
         print("Error: Administrator privileges required to run on port 80")
