@@ -12,6 +12,8 @@ from . import db
 
 main = Blueprint('main', __name__)
 
+# In app/main.py, modify the index route:
+
 @main.route('/')
 @login_required
 def index():
@@ -21,14 +23,20 @@ def index():
     else:
         projects = Project.query.filter_by(is_active=True).all()
         users = None
+
     current_month_hours = TimeEntry.query \
         .filter(TimeEntry.user_id == current_user.id) \
         .filter(extract('month', TimeEntry.date) == datetime.now().month) \
         .with_entities(func.sum(TimeEntry.hours)) \
         .scalar() or 0
     
-    user_assignments = ProjectAssignment.query.filter_by(user_id=current_user.id).all()
-
+    # Filter active assignments
+    today = datetime.now().date()
+    user_assignments = ProjectAssignment.query\
+        .filter_by(user_id=current_user.id)\
+        .filter(ProjectAssignment.start_date <= today)\
+        .filter(ProjectAssignment.end_date >= today)\
+        .all()
 
     return render_template(
         'index.html',
