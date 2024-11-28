@@ -2,3 +2,97 @@
 2024-11-26 16:45:26,954 - INFO - Serving on http://0.0.0.0:80
 2024-11-26 16:46:20,772 - INFO - Serving on http://0.0.0.0:80
 2024-11-26 16:49:22,662 - INFO - Serving on http://0.0.0.0:80
+2024-11-26 17:06:34,642 - ERROR - Failed to bind to port 80. Try running as administrator.
+2024-11-26 17:07:04,182 - ERROR - Failed to bind to port 80. Try running as administrator.
+2024-11-26 17:07:19,606 - ERROR - Failed to bind to port 80. Try running as administrator.
+2024-11-26 17:07:57,421 - ERROR - Failed to bind to port 80. Try running as administrator.
+2024-11-26 17:08:29,986 - ERROR - Failed to bind to port 80. Try running as administrator.
+2024-11-26 17:10:51,983 - ERROR - Failed to bind to port 80. Try running as administrator.
+2024-11-26 17:11:12,339 - ERROR - Failed to bind to port 80. Try running as administrator.
+2024-11-26 17:11:30,485 - ERROR - Failed to bind to port 80. Try running as administrator.
+2024-11-26 17:11:37,620 - INFO - Serving on http://[::1]:81
+2024-11-26 17:11:37,620 - INFO - Serving on http://127.0.0.1:81
+2024-11-26 17:13:00,823 - INFO - Serving on http://127.0.0.1:81
+2024-11-26 17:13:25,580 - INFO - Serving on http://192.168.3.100:81
+2024-11-26 17:17:16,765 - INFO - Serving on http://192.168.3.100:80
+2024-11-26 17:43:22,787 - ERROR - Exception on /export [POST]
+Traceback (most recent call last):
+  File "C:\Users\Honza\Documents\LOOM_TRACKER\.venv\Lib\site-packages\flask\app.py", line 2528, in wsgi_app
+    response = self.full_dispatch_request()
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Honza\Documents\LOOM_TRACKER\.venv\Lib\site-packages\flask\app.py", line 1825, in full_dispatch_request
+    rv = self.handle_user_exception(e)
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Honza\Documents\LOOM_TRACKER\.venv\Lib\site-packages\flask\app.py", line 1823, in full_dispatch_request
+    rv = self.dispatch_request()
+         ^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Honza\Documents\LOOM_TRACKER\.venv\Lib\site-packages\flask\app.py", line 1799, in dispatch_request
+    return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Honza\Documents\LOOM_TRACKER\.venv\Lib\site-packages\flask_login\utils.py", line 290, in decorated_view
+    return current_app.ensure_sync(func)(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Honza\Documents\LOOM_TRACKER\app\main.py", line 64, in export_data
+    end_date = datetime.strptime(data['end_date'], '%Y-%m-%d').date()
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Program Files\WindowsApps\PythonSoftwareFoundation.Python.3.12_3.12.2032.0_x64__qbz5n2kfra8p0\Lib\_strptime.py", line 554, in _strptime_datetime
+    tt, fraction, gmtoff_fraction = _strptime(data_string, format)
+                                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Program Files\WindowsApps\PythonSoftwareFoundation.Python.3.12_3.12.2032.0_x64__qbz5n2kfra8p0\Lib\_strptime.py", line 333, in _strptime
+    raise ValueError("time data %r does not match format %r" %
+ValueError: time data '' does not match format '%Y-%m-%d'
+2024-11-26 17:43:26,246 - ERROR - Exception on /export [POST]
+Traceback (most recent call last):
+  File "C:\Users\Honza\Documents\LOOM_TRACKER\.venv\Lib\site-packages\flask\app.py", line 2528, in wsgi_app
+    response = self.full_dispatch_request()
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Honza\Documents\LOOM_TRACKER\.venv\Lib\site-packages\flask\app.py", line 1825, in full_dispatch_request
+    rv = self.handle_user_exception(e)
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Honza\Documents\LOOM_TRACKER\.venv\Lib\site-packages\flask\app.py", line 1823, in full_dispatch_request
+    rv = self.dispatch_request()
+         ^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Honza\Documents\LOOM_TRACKER\.venv\Lib\site-packages\flask\app.py", line 1799, in dispatch_request
+    return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Honza\Documents\LOOM_TRACKER\.venv\Lib\site-packages\flask_login\utils.py", line 290, in decorated_view
+    return current_app.ensure_sync(func)(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Honza\Documents\LOOM_TRACKER\app\main.py", line 64, in export_data
+    end_date = datetime.strptime(data['end_date'], '%Y-%m-%d').date()
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Program Files\WindowsApps\PythonSoftwareFoundation.Python.3.12_3.12.2032.0_x64__qbz5n2kfra8p0\Lib\_strptime.py", line 554, in _strptime_datetime
+    tt, fraction, gmtoff_fraction = _strptime(data_string, format)
+                                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Program Files\WindowsApps\PythonSoftwareFoundation.Python.3.12_3.12.2032.0_x64__qbz5n2kfra8p0\Lib\_strptime.py", line 333, in _strptime
+    raise ValueError("time data %r does not match format %r" %
+ValueError: time data '' does not match format '%Y-%m-%d'
+2024-11-26 17:43:28,185 - ERROR - Exception on /export [POST]
+Traceback (most recent call last):
+  File "C:\Users\Honza\Documents\LOOM_TRACKER\.venv\Lib\site-packages\flask\app.py", line 2528, in wsgi_app
+    response = self.full_dispatch_request()
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Honza\Documents\LOOM_TRACKER\.venv\Lib\site-packages\flask\app.py", line 1825, in full_dispatch_request
+    rv = self.handle_user_exception(e)
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Honza\Documents\LOOM_TRACKER\.venv\Lib\site-packages\flask\app.py", line 1823, in full_dispatch_request
+    rv = self.dispatch_request()
+         ^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Honza\Documents\LOOM_TRACKER\.venv\Lib\site-packages\flask\app.py", line 1799, in dispatch_request
+    return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Honza\Documents\LOOM_TRACKER\.venv\Lib\site-packages\flask_login\utils.py", line 290, in decorated_view
+    return current_app.ensure_sync(func)(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Honza\Documents\LOOM_TRACKER\app\main.py", line 64, in export_data
+    end_date = datetime.strptime(data['end_date'], '%Y-%m-%d').date()
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Program Files\WindowsApps\PythonSoftwareFoundation.Python.3.12_3.12.2032.0_x64__qbz5n2kfra8p0\Lib\_strptime.py", line 554, in _strptime_datetime
+    tt, fraction, gmtoff_fraction = _strptime(data_string, format)
+                                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Program Files\WindowsApps\PythonSoftwareFoundation.Python.3.12_3.12.2032.0_x64__qbz5n2kfra8p0\Lib\_strptime.py", line 333, in _strptime
+    raise ValueError("time data %r does not match format %r" %
+ValueError: time data '' does not match format '%Y-%m-%d'
+2024-11-27 16:28:10,313 - INFO - Serving on http://192.168.3.100:80
+2024-11-27 16:35:10,059 - INFO - Serving on http://192.168.3.100:80
+2024-11-27 16:37:22,024 - INFO - Serving on http://192.168.3.100:80

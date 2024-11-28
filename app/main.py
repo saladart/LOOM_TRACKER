@@ -188,7 +188,7 @@ def add_project():
         db.session.commit()
 
         flash(f'Project {project_name} created successfully')
-        return redirect(url_for('main.index'))
+        return redirect(url_for('main.manage_projects'))
     
     return render_template('add_project.html')
 

@@ -7,3 +7,4 @@ numpy==1.26.4
 XlsxWriter==3.0.9
 gunicorn==20.1.0
 waitress
+flask_migrate
