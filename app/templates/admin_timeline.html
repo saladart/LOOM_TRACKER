@@ -78,6 +78,15 @@ style.textContent = `
         padding: 2px !important;
         z-index: 1000 !important;
     }
+    .vis-item {
+        color: white !important;
+    }
+    .vis-text {
+        color: white !important;
+    }
+    .vis-label {
+        color: white !important;
+    }
 `;
 document.head.appendChild(style);
 
@@ -113,7 +122,7 @@ var items = new vis.DataSet([
         group: assign.project_id,
         style: 'background-color:' + userColors[assign.user_id] + '; color: #fff;'
     })),
-    ...deadlineItems  // Add deadline items
+    ...deadlineItems
 ]);
 
 var groups = new vis.DataSet(projects.map(project => ({
@@ -132,6 +141,7 @@ var options = {
     },
     stack: true,
     orientation: 'both',
+    locale: 'en_US',
     onMove: function (item, callback) {
         console.log('Item moved:', item);
         
