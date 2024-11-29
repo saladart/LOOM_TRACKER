@@ -19,6 +19,76 @@
             </ul>
         </div>
 
+        <!-- Add to index.html before the form -->
+        <div class="row mb-4">
+            <div class="col-md-6">
+                <div class="card bg-dark">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">Last 7 Days ({{ week_ago.strftime('%Y-%m-%d') }} - {{ today.strftime('%Y-%m-%d') }})</h5>
+                    </div>
+                    <div class="card-body">
+                        {% if weekly_summary %}
+                            <table class="table table-dark table-sm">
+                                <thead>
+                                    <tr>
+                                        <th>Project</th>
+                                        <th>Hours</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for project in weekly_summary %}
+                                    <tr>
+                                        <td>{{ project.name }}</td>
+                                        <td>{{ "%.2f"|format(project.total_hours) }}</td>
+                                    </tr>
+                                    {% endfor %}
+                                    <tr class="table-active">
+                                        <td><strong>Total</strong></td>
+                                        <td><strong>{{ "%.2f"|format(weekly_summary|sum(attribute='total_hours')) }}</strong></td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        {% else %}
+                            <p class="text-muted mb-0">No entries in the last 7 days</p>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="card bg-dark">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">Last 30 Days ({{ month_ago.strftime('%Y-%m-%d') }} - {{ today.strftime('%Y-%m-%d') }})</h5>
+                    </div>
+                    <div class="card-body">
+                        {% if monthly_summary %}
+                            <table class="table table-dark table-sm">
+                                <thead>
+                                    <tr>
+                                        <th>Project</th>
+                                        <th>Hours</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for project in monthly_summary %}
+                                    <tr>
+                                        <td>{{ project.name }}</td>
+                                        <td>{{ "%.2f"|format(project.total_hours) }}</td>
+                                    </tr>
+                                    {% endfor %}
+                                    <tr class="table-active">
+                                        <td><strong>Total</strong></td>
+                                        <td><strong>{{ "%.2f"|format(monthly_summary|sum(attribute='total_hours')) }}</strong></td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        {% else %}
+                            <p class="text-muted mb-0">No entries in the last 30 days</p>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <form id="timeEntryForm">
             <div class="mb-3">
                 <label for="entry-date" class="form-label">Date</label>

@@ -24,6 +24,32 @@ def index():
         projects = Project.query.filter_by(is_active=True).all()
         users = None
 
+    today = datetime.now().date()
+    week_ago = today - timedelta(days=7)
+    month_ago = today - timedelta(days=30)
+
+    # Weekly summary
+    weekly_entries = db.session.query(
+        Project.name,
+        func.sum(TimeEntry.hours).label('total_hours')
+    ).join(TimeEntry)\
+    .filter(
+        TimeEntry.user_id == current_user.id,
+        TimeEntry.date >= week_ago,
+        TimeEntry.date <= today
+    ).group_by(Project.name).all()
+
+    # Monthly summary
+    monthly_entries = db.session.query(
+        Project.name,
+        func.sum(TimeEntry.hours).label('total_hours')
+    ).join(TimeEntry)\
+    .filter(
+        TimeEntry.user_id == current_user.id,
+        TimeEntry.date >= month_ago,
+        TimeEntry.date <= today
+    ).group_by(Project.name).all()
+
     current_month_hours = TimeEntry.query \
         .filter(TimeEntry.user_id == current_user.id) \
         .filter(extract('month', TimeEntry.date) == datetime.now().month) \
@@ -43,7 +69,12 @@ def index():
         projects=projects,
         users=users,
         current_month_hours=current_month_hours,
-        user_assignments=user_assignments
+        user_assignments=user_assignments,
+        weekly_summary=weekly_entries,
+        monthly_summary=monthly_entries,
+        week_ago=week_ago,
+        month_ago=month_ago,
+        today=today
     )
 
 @main.route('/add_entry', methods=['POST'])
