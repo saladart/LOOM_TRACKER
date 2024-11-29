@@ -93,9 +93,9 @@
                         <label class="form-label">Projects</label>
                         <select class="form-select" id="export-projects" multiple>
                             {% for project in projects %}
-                            {% if project.is_active %}
+                            <!-- {% if project.is_active %} -->
                             <option value="{{ project.id }}">{{ project.name }}</option>
-                            {% endif %}
+                            <!-- {% endif %} -->
                             {% endfor %}
                         </select>
                         <div class="form-text">Leave empty to include all projects</div>
@@ -106,9 +106,9 @@
                         <label class="form-label">Users</label>
                         <select class="form-select" id="export-users" multiple>
                             {% for user in users %}
-                                {% if user.is_active %}
+                                <!-- {% if user.is_active %} -->
                                 <option value="{{ user.id }}">{{ user.username }}</option>
-                                {% endif %}
+                                <!-- {% endif %} -->
                             {% endfor %}
                         </select>
                         <div class="form-text">Leave empty to include all users</div>
