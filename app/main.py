@@ -392,8 +392,8 @@ def update_assignment():
     assignment = ProjectAssignment.query.get(data['id'])
     if assignment:
         assignment.project_id = data['project_id']  # Add this line
-        assignment.start_date = datetime.fromisoformat(data['start_date']).date()
-        assignment.end_date = datetime.fromisoformat(data['end_date']).date()
+        assignment.start_date = datetime.fromisoformat(data['start_date']).date() + timedelta(days=1)
+        assignment.end_date = datetime.fromisoformat(data['end_date']).date() + timedelta(days=1)
         db.session.commit()
         return jsonify({'status': 'success'})
     return jsonify({'status': 'error', 'message': 'Assignment not found'}), 404
