@@ -442,3 +442,46 @@ def toggle_admin():
     db.session.commit()
 
     return jsonify({'status': 'success'})
+
+# Table to edit entries
+
+@main.route('/my_entries')
+@login_required
+def my_entries():
+    # Get last 30 days entries
+    thirty_days_ago = datetime.now().date() - timedelta(days=30)
+    entries = TimeEntry.query\
+        .filter(TimeEntry.user_id == current_user.id)\
+        .filter(TimeEntry.date >= thirty_days_ago)\
+        .order_by(TimeEntry.date.desc())\
+        .all()
+        
+    projects = Project.query.filter_by(is_active=True).all()
+    return render_template('my_entries.html', entries=entries, projects=projects)
+
+@main.route('/update_entry', methods=['POST'])
+@login_required
+def update_entry():
+    data = request.get_json()
+    entry = TimeEntry.query.get_or_404(data['id'])
+    
+    if entry.user_id != current_user.id:
+        return jsonify({'status': 'error', 'message': 'Unauthorized'}), 403
+        
+    entry.project_id = data['project_id']
+    entry.hours = float(data['hours'])
+    db.session.commit()
+    return jsonify({'status': 'success'})
+
+@main.route('/delete_entry', methods=['POST'])
+@login_required
+def delete_entry():
+    data = request.get_json()
+    entry = TimeEntry.query.get_or_404(data['id'])
+    
+    if entry.user_id != current_user.id:
+        return jsonify({'status': 'error', 'message': 'Unauthorized'}), 403
+        
+    db.session.delete(entry)
+    db.session.commit()
+    return jsonify({'status': 'success'})

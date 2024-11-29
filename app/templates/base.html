@@ -61,11 +61,14 @@
                 <li class="nav-item">
                     <a class="nav-link" href="{{ url_for('main.admin_timeline') }}">Timeline</a>
                 </li>
+                {% endif %}
+                <li class="nav-item">
+                    <a class="nav-link" href="{{ url_for('main.my_entries') }}">My Entries</a>
+                </li>
                 <!-- White space to separate buttons -->
                 <li class="nav-item">
                     <a class="nav-link" href="#">|</a>
                 </li>
-                {% endif %}
                     <span class="nav-item nav-link">{{ current_user.username }}</span>
                     <a class="nav-item nav-link" href="{{ url_for('auth.logout') }}">Logout</a>
                 {% endif %}
