@@ -258,7 +258,7 @@ def bulk_entry():
         end_date = datetime.strptime(request.form['end_date'], '%Y-%m-%d').date()
         project_id = request.form['project_id']
         total_hours = float(request.form['hours'])
-        hours_per_day = total_hours / (end_date - start_date).days
+        hours_per_day = total_hours / ((end_date - start_date).days + 1)
         
         current_date = start_date
         while current_date <= end_date:
