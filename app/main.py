@@ -123,7 +123,21 @@ def export_data():
         'User': entry.user.username if hasattr(entry.user, 'username') else '',
         'Hours': entry.hours
     } for entry in entries])
-    
+
+    # Check if the DataFrame is empty
+    if df.empty:
+        # get user names from user ids from db 
+        if data.get('users'):
+            users = User.query.filter(User.id.in_(data['users'])).all()
+            user_names = [user.username for user in users]
+            error_message = f'No data found for the selected range and users: {", ".join(user_names)}'
+        else:
+            error_message = 'No data found for the selected range'
+        return jsonify({
+            'status': 'error', 
+            'message': error_message
+            }), 404
+        
     # Sort by date if 'Date' column exists
     if 'Date' in df.columns:
         df = df.sort_values('Date')

@@ -324,7 +324,11 @@ async function exportData() {
             const modal = bootstrap.Modal.getInstance(document.getElementById('exportModal'));
             modal.hide();
         } else {
-            alert('Error exporting data. Please try again.');
+            response.json().then(data => {
+                alert(`Error exporting data: ${data.message}`);
+            }).catch(() => {
+                alert('Error exporting data. Please try again.');
+            });
         }
     } catch (error) {
         console.error('Error:', error);
