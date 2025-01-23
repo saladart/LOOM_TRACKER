@@ -23,17 +23,6 @@ def init_database():
             )
             db.session.add(admin)
             
-            # # Add some initial projects
-            # projects = [
-            #     'MOST ArtGarden',
-            #     'ZLIN Sad Svobody',
-            #     'Muzeum Langweil'
-            # ]
-            
-            # for project_name in projects:
-            #     project = Project(name=project_name)
-            #     db.session.add(project)
-            
             db.session.commit()
             print("Database initialized with admin user and initial projects")
         else:
